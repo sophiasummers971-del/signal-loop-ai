@@ -79,7 +79,7 @@ const Index = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/onboarding">
+              <Link to="/auth">
                 <Button variant="accent" size="xl" className="gap-2">
                   Start Free <ArrowRight className="w-5 h-5" />
                 </Button>
@@ -198,7 +198,7 @@ const Index = () => {
             <p className="text-primary-foreground/70 text-lg mb-10 max-w-xl mx-auto">
               Join thousands turning hidden skills into real income. It takes just 2 minutes to start.
             </p>
-            <Link to="/onboarding">
+            <Link to="/auth">
               <Button variant="accent" size="xl" className="gap-2">
                 Get Started Free <ArrowRight className="w-5 h-5" />
               </Button>

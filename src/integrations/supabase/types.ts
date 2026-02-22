@@ -14,7 +14,169 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ideas: {
+        Row: {
+          audience: string | null
+          created_at: string
+          id: string
+          match_score: number | null
+          monetization: string | null
+          mvp_steps: string[] | null
+          problem: string | null
+          stage: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audience?: string | null
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          monetization?: string | null
+          mvp_steps?: string[] | null
+          problem?: string | null
+          stage?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audience?: string | null
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          monetization?: string | null
+          mvp_steps?: string[] | null
+          problem?: string | null
+          stage?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          hours_per_week: string | null
+          id: string
+          income_goal: string | null
+          interests: string[] | null
+          name: string
+          onboarding_complete: boolean | null
+          portfolio: string | null
+          skills: string[] | null
+          updated_at: string
+          user_id: string
+          work_style: string | null
+        }
+        Insert: {
+          created_at?: string
+          hours_per_week?: string | null
+          id?: string
+          income_goal?: string | null
+          interests?: string[] | null
+          name?: string
+          onboarding_complete?: boolean | null
+          portfolio?: string | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id: string
+          work_style?: string | null
+        }
+        Update: {
+          created_at?: string
+          hours_per_week?: string | null
+          id?: string
+          income_goal?: string | null
+          interests?: string[] | null
+          name?: string
+          onboarding_complete?: boolean | null
+          portfolio?: string | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id?: string
+          work_style?: string | null
+        }
+        Relationships: []
+      }
+      revenue_logs: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          idea_id: string | null
+          logged_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          idea_id?: string | null
+          logged_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          idea_id?: string | null
+          logged_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_logs_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          id: string
+          idea_id: string | null
+          sort_order: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          idea_id?: string | null
+          sort_order?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          idea_id?: string | null
+          sort_order?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

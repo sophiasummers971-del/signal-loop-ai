@@ -1,13 +1,21 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Zap, Menu, X } from "lucide-react";
+import { Zap, Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const isLanding = location.pathname === "/";
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isLanding ? "bg-transparent" : "bg-card/80 backdrop-blur-md border-b"}`}>
@@ -26,14 +34,22 @@ const Navbar = () => {
             <>
               <a href="#features" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">Features</a>
               <a href="#how-it-works" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">How it works</a>
-              <Link to="/onboarding">
-                <Button variant="accent" size="sm">Get Started</Button>
-              </Link>
+              {user ? (
+                <Link to="/dashboard">
+                  <Button variant="accent" size="sm">Dashboard</Button>
+                </Link>
+              ) : (
+                <Link to="/auth">
+                  <Button variant="accent" size="sm">Get Started</Button>
+                </Link>
+              )}
             </>
           ) : (
             <>
               <Link to="/dashboard" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Dashboard</Link>
-              <Link to="/roadmap" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Roadmap</Link>
+              <button onClick={handleSignOut} className="text-muted-foreground hover:text-foreground text-sm transition-colors flex items-center gap-1">
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
             </>
           )}
         </div>
@@ -56,16 +72,13 @@ const Navbar = () => {
           >
             <div className="px-4 py-4 flex flex-col gap-3">
               {isLanding ? (
-                <>
-                  <a href="#features" className="text-muted-foreground hover:text-foreground text-sm py-2" onClick={() => setMobileOpen(false)}>Features</a>
-                  <Link to="/onboarding" onClick={() => setMobileOpen(false)}>
-                    <Button variant="accent" size="sm" className="w-full">Get Started</Button>
-                  </Link>
-                </>
+                <Link to={user ? "/dashboard" : "/auth"} onClick={() => setMobileOpen(false)}>
+                  <Button variant="accent" size="sm" className="w-full">{user ? "Dashboard" : "Get Started"}</Button>
+                </Link>
               ) : (
                 <>
                   <Link to="/dashboard" className="text-muted-foreground hover:text-foreground text-sm py-2" onClick={() => setMobileOpen(false)}>Dashboard</Link>
-                  <Link to="/roadmap" className="text-muted-foreground hover:text-foreground text-sm py-2" onClick={() => setMobileOpen(false)}>Roadmap</Link>
+                  <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="text-muted-foreground hover:text-foreground text-sm py-2 text-left">Sign Out</button>
                 </>
               )}
             </div>
