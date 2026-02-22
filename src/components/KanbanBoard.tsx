@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 interface Opportunity {
   id: string;
   title: string;
-  match: number;
+  match_score: number;
   stage: "idea" | "validate" | "build" | "monetize" | "scale";
 }
 
@@ -38,7 +38,7 @@ const KanbanBoard = ({ opportunities }: { opportunities: Opportunity[] }) => {
                       className="bg-card rounded-lg p-3 border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                     >
                       <div className="font-medium text-sm text-foreground">{item.title}</div>
-                      <div className="text-xs text-muted-foreground mt-1">{item.match}% match</div>
+                      <div className="text-xs text-muted-foreground mt-1">{item.match_score}% match</div>
                     </motion.div>
                   ))
                 ) : (
