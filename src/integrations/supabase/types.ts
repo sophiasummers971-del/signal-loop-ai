@@ -23,6 +23,7 @@ export type Database = {
           monetization: string | null
           mvp_steps: string[] | null
           problem: string | null
+          sort_order: number
           stage: string
           title: string
           updated_at: string
@@ -36,6 +37,7 @@ export type Database = {
           monetization?: string | null
           mvp_steps?: string[] | null
           problem?: string | null
+          sort_order?: number
           stage?: string
           title: string
           updated_at?: string
@@ -49,6 +51,7 @@ export type Database = {
           monetization?: string | null
           mvp_steps?: string[] | null
           problem?: string | null
+          sort_order?: number
           stage?: string
           title?: string
           updated_at?: string
