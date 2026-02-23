@@ -131,7 +131,7 @@ const Dashboard = () => {
           )
         )}
 
-        {view === "roadmap" && <KanbanBoard opportunities={ideas} />}
+        {view === "roadmap" && <KanbanBoard opportunities={ideas} onStageChange={updateStage} />}
 
         {view === "tasks" && <TaskManager ideas={ideas.map((i) => ({ id: i.id, title: i.title }))} />}
 
