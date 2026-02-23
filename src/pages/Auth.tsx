@@ -8,10 +8,28 @@ import { toast } from "sonner";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Check your email for a password reset link!");
+      setIsForgotPassword(false);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,59 +69,109 @@ const Auth = () => {
 
         <div className="bg-card rounded-2xl p-8 shadow-lg">
           <h1 className="font-display text-2xl font-bold text-foreground text-center mb-2">
-            {isLogin ? "Welcome back" : "Create your account"}
+            {isForgotPassword ? "Reset password" : isLogin ? "Welcome back" : "Create your account"}
           </h1>
           <p className="text-muted-foreground text-center text-sm mb-6">
-            {isLogin ? "Sign in to access your dashboard" : "Start discovering micro-income opportunities"}
+            {isForgotPassword
+              ? "Enter your email and we'll send you a reset link"
+              : isLogin
+              ? "Sign in to access your dashboard"
+              : "Start discovering micro-income opportunities"}
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-10 h-12"
-                  required
-                />
+          {isForgotPassword ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="pl-10 h-12"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="pl-10 h-12"
-                  required
-                  minLength={6}
-                />
+              <Button variant="accent" size="lg" className="w-full gap-2" disabled={loading}>
+                {loading ? "Sending..." : "Send Reset Link"}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+
+              <div className="text-center">
+                <button
+                  onClick={() => setIsForgotPassword(false)}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Back to <span className="font-medium text-accent">Sign in</span>
+                </button>
               </div>
-            </div>
+            </form>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="pl-10 h-12"
+                      required
+                    />
+                  </div>
+                </div>
 
-            <Button variant="accent" size="lg" className="w-full gap-2" disabled={loading}>
-              {loading ? "Loading..." : isLogin ? "Sign In" : "Create Account"}
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </form>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-sm font-medium text-foreground">Password</label>
+                    {isLogin && (
+                      <button
+                        type="button"
+                        onClick={() => setIsForgotPassword(true)}
+                        className="text-xs text-accent hover:text-accent/80 transition-colors"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-10 h-12"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
 
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <span className="font-medium text-accent">{isLogin ? "Sign up" : "Sign in"}</span>
-            </button>
-          </div>
+                <Button variant="accent" size="lg" className="w-full gap-2" disabled={loading}>
+                  {loading ? "Loading..." : isLogin ? "Sign In" : "Create Account"}
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <button
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {isLogin ? "Don't have an account? " : "Already have an account? "}
+                  <span className="font-medium text-accent">{isLogin ? "Sign up" : "Sign in"}</span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
