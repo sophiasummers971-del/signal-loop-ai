@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import OpportunityCard from "@/components/OpportunityCard";
 import KanbanBoard from "@/components/KanbanBoard";
-import { Sparkles, TrendingUp, Lightbulb, BarChart3, Loader2 } from "lucide-react";
+import RevenueChart from "@/components/RevenueChart";
+import TaskManager from "@/components/TaskManager";
+import { Sparkles, TrendingUp, Lightbulb, BarChart3, DollarSign, ListChecks, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -19,9 +21,11 @@ interface Idea {
   stage: "idea" | "validate" | "build" | "monetize" | "scale";
 }
 
+type ViewTab = "opportunities" | "roadmap" | "tasks" | "revenue";
+
 const Dashboard = () => {
   const { user } = useAuth();
-  const [view, setView] = useState<"opportunities" | "roadmap">("opportunities");
+  const [view, setView] = useState<ViewTab>("opportunities");
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<{ name: string } | null>(null);
@@ -58,6 +62,13 @@ const Dashboard = () => {
     );
   }
 
+  const tabs: { key: ViewTab; label: string; icon: React.ElementType }[] = [
+    { key: "opportunities", label: "Opportunities", icon: Sparkles },
+    { key: "roadmap", label: "Roadmap", icon: BarChart3 },
+    { key: "tasks", label: "Tasks", icon: ListChecks },
+    { key: "revenue", label: "Revenue", icon: DollarSign },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -89,16 +100,21 @@ const Dashboard = () => {
           ))}
         </motion.div>
 
-        <div className="flex gap-2 mb-6">
-          <Button variant={view === "opportunities" ? "default" : "ghost"} size="sm" onClick={() => setView("opportunities")}>
-            <Sparkles className="w-4 h-4 mr-1" /> Opportunities
-          </Button>
-          <Button variant={view === "roadmap" ? "default" : "ghost"} size="sm" onClick={() => setView("roadmap")}>
-            <BarChart3 className="w-4 h-4 mr-1" /> Roadmap
-          </Button>
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+          {tabs.map((tab) => (
+            <Button
+              key={tab.key}
+              variant={view === tab.key ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setView(tab.key)}
+              className="shrink-0"
+            >
+              <tab.icon className="w-4 h-4 mr-1" /> {tab.label}
+            </Button>
+          ))}
         </div>
 
-        {view === "opportunities" ? (
+        {view === "opportunities" && (
           ideas.length > 0 ? (
             <div className="grid md:grid-cols-2 gap-6">
               {ideas.map((opp, i) => (
@@ -113,9 +129,13 @@ const Dashboard = () => {
               <p>No opportunities yet. Complete the onboarding to generate ideas!</p>
             </div>
           )
-        ) : (
-          <KanbanBoard opportunities={ideas} />
         )}
+
+        {view === "roadmap" && <KanbanBoard opportunities={ideas} />}
+
+        {view === "tasks" && <TaskManager ideas={ideas.map((i) => ({ id: i.id, title: i.title }))} />}
+
+        {view === "revenue" && <RevenueChart ideas={ideas.map((i) => ({ id: i.id, title: i.title }))} />}
       </div>
     </div>
   );
