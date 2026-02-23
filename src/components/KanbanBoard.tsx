@@ -1,4 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   DndContext,
   DragOverlay,
@@ -182,6 +192,19 @@ const KanbanBoard = ({
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<string | null>(null);
+  const [pendingScale, setPendingScale] = useState<{ id: string; title: string } | null>(null);
+
+  const handleStageChangeWithConfirm = useCallback(
+    (ideaId: string, newStage: string) => {
+      if (newStage === "scale") {
+        const item = opportunities.find((o) => o.id === ideaId);
+        setPendingScale({ id: ideaId, title: item?.title || "this idea" });
+      } else {
+        onStageChange?.(ideaId, newStage);
+      }
+    },
+    [opportunities, onStageChange]
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -247,10 +270,8 @@ const KanbanBoard = ({
     if (!targetStage) return;
 
     if (activeItemData.stage !== targetStage) {
-      // Cross-column move
-      if (onStageChange) {
-        onStageChange(activeItemData.id, targetStage);
-      }
+      // Cross-column move (with confirmation for Scale)
+      handleStageChangeWithConfirm(activeItemData.id, targetStage);
     } else {
       // Same-column reorder
       const columnItems = [...itemsByStage[targetStage]];
@@ -270,6 +291,7 @@ const KanbanBoard = ({
   };
 
   return (
+    <>
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
@@ -313,7 +335,7 @@ const KanbanBoard = ({
               stage={stage}
               items={itemsByStage[stage.key]}
               isOver={overColumn === stage.key}
-              onStageChange={onStageChange}
+              onStageChange={handleStageChangeWithConfirm}
             />
           ))}
         </div>
@@ -322,6 +344,32 @@ const KanbanBoard = ({
         {activeItem ? <OverlayCard item={activeItem} /> : null}
       </DragOverlay>
     </DndContext>
+
+    <AlertDialog open={!!pendingScale} onOpenChange={(open) => !open && setPendingScale(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="font-display">🚀 Launch "{pendingScale?.title}"?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Moving this idea to the Scale stage marks it as fully launched. This means you've validated, built, and started monetizing it. Ready to scale?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-accent text-accent-foreground hover:bg-accent/90"
+            onClick={() => {
+              if (pendingScale && onStageChange) {
+                onStageChange(pendingScale.id, "scale");
+              }
+              setPendingScale(null);
+            }}
+          >
+            🚀 Launch It!
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 };
 
