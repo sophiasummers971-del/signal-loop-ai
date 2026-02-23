@@ -18,6 +18,7 @@ interface Idea {
   monetization: string;
   mvp_steps: string[];
   match_score: number;
+  sort_order: number;
   stage: "idea" | "validate" | "build" | "monetize" | "scale";
 }
 
@@ -50,6 +51,24 @@ const Dashboard = () => {
   const updateStage = async (ideaId: string, stage: string) => {
     await supabase.from("ideas").update({ stage }).eq("id", ideaId);
     setIdeas((prev) => prev.map((i) => (i.id === ideaId ? { ...i, stage: stage as Idea["stage"] } : i)));
+  };
+
+  const handleReorder = async (reorderedItems: Idea[]) => {
+    // Optimistic update
+    setIdeas((prev) => {
+      const updated = [...prev];
+      reorderedItems.forEach((item) => {
+        const idx = updated.findIndex((i) => i.id === item.id);
+        if (idx !== -1) updated[idx] = { ...updated[idx], sort_order: item.sort_order };
+      });
+      return updated;
+    });
+    // Persist to DB
+    await Promise.all(
+      reorderedItems.map((item) =>
+        supabase.from("ideas").update({ sort_order: item.sort_order }).eq("id", item.id)
+      )
+    );
   };
 
   const bestMatch = ideas.length ? Math.max(...ideas.map((i) => i.match_score)) : 0;
@@ -131,7 +150,7 @@ const Dashboard = () => {
           )
         )}
 
-        {view === "roadmap" && <KanbanBoard opportunities={ideas} onStageChange={updateStage} />}
+        {view === "roadmap" && <KanbanBoard opportunities={ideas} onStageChange={updateStage} onReorder={handleReorder} />}
 
         {view === "tasks" && <TaskManager ideas={ideas.map((i) => ({ id: i.id, title: i.title }))} />}
 

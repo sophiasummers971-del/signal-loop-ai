@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
-  closestCenter,
+  closestCorners,
   PointerSensor,
   TouchSensor,
   KeyboardSensor,
@@ -10,8 +10,15 @@ import {
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
+  type DragOverEvent,
 } from "@dnd-kit/core";
-import { useDroppable, useDraggable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
 
@@ -20,6 +27,7 @@ interface Opportunity {
   title: string;
   match_score: number;
   stage: "idea" | "validate" | "build" | "monetize" | "scale";
+  sort_order: number;
 }
 
 const stages = [
@@ -32,20 +40,28 @@ const stages = [
 
 const stageKeys = stages.map((s) => s.key);
 
-const DraggableCard = ({
+const SortableCard = ({
   item,
   onStageChange,
 }: {
   item: Opportunity;
   onStageChange?: (id: string, stage: string) => void;
 }) => {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: item.id,
-    data: { stage: item.stage },
+    data: { stage: item.stage, type: "card" },
   });
 
   const style = {
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Transform.toString(transform),
+    transition,
     opacity: isDragging ? 0.3 : 1,
   };
 
@@ -57,9 +73,7 @@ const DraggableCard = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-card rounded-lg p-3 border shadow-sm hover:shadow-md transition-shadow group ${
-        isDragging ? "" : ""
-      }`}
+      className="bg-card rounded-lg p-3 border shadow-sm hover:shadow-md transition-shadow group"
       role="listitem"
       aria-label={`${item.title}, ${item.match_score}% match, in ${item.stage} stage`}
     >
@@ -78,14 +92,13 @@ const DraggableCard = ({
           <div className="text-xs text-muted-foreground mt-1">{item.match_score}% match</div>
         </div>
       </div>
-      {/* Keyboard-accessible stage move buttons */}
       {onStageChange && (
         <div className="flex items-center justify-end gap-1 mt-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
           <button
             onClick={() => canMoveLeft && onStageChange(item.id, stageKeys[currentIndex - 1])}
             disabled={!canMoveLeft}
             className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-            aria-label={`Move ${item.title} to ${canMoveLeft ? stages[currentIndex - 1].label : "previous stage"}`}
+            aria-label={`Move to ${canMoveLeft ? stages[currentIndex - 1].label : "previous stage"}`}
             tabIndex={0}
           >
             <ChevronLeft className="w-3.5 h-3.5" />
@@ -95,7 +108,7 @@ const DraggableCard = ({
             onClick={() => canMoveRight && onStageChange(item.id, stageKeys[currentIndex + 1])}
             disabled={!canMoveRight}
             className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-            aria-label={`Move ${item.title} to ${canMoveRight ? stages[currentIndex + 1].label : "next stage"}`}
+            aria-label={`Move to ${canMoveRight ? stages[currentIndex + 1].label : "next stage"}`}
             tabIndex={0}
           >
             <ChevronRight className="w-3.5 h-3.5" />
@@ -118,6 +131,7 @@ const DroppableColumn = ({
   onStageChange?: (id: string, stage: string) => void;
 }) => {
   const { setNodeRef } = useDroppable({ id: stage.key });
+  const itemIds = useMemo(() => items.map((i) => i.id), [items]);
 
   return (
     <div className="flex-1 min-w-[200px]" role="region" aria-label={`${stage.label} column, ${items.length} items`}>
@@ -134,15 +148,17 @@ const DroppableColumn = ({
           isOver ? "ring-2 ring-accent/50 scale-[1.02]" : ""
         }`}
       >
-        {items.length > 0 ? (
-          items.map((item) => (
-            <DraggableCard key={item.id} item={item} onStageChange={onStageChange} />
-          ))
-        ) : (
-          <div className="flex items-center justify-center h-full text-sm text-muted-foreground/50 py-8">
-            Drop ideas here
-          </div>
-        )}
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          {items.length > 0 ? (
+            items.map((item) => (
+              <SortableCard key={item.id} item={item} onStageChange={onStageChange} />
+            ))
+          ) : (
+            <div className="flex items-center justify-center h-full text-sm text-muted-foreground/50 py-8">
+              Drop ideas here
+            </div>
+          )}
+        </SortableContext>
       </div>
     </div>
   );
@@ -158,9 +174,11 @@ const OverlayCard = ({ item }: { item: Opportunity }) => (
 const KanbanBoard = ({
   opportunities,
   onStageChange,
+  onReorder,
 }: {
   opportunities: Opportunity[];
   onStageChange?: (ideaId: string, newStage: string) => void;
+  onReorder?: (reordered: Opportunity[]) => void;
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<string | null>(null);
@@ -173,16 +191,42 @@ const KanbanBoard = ({
 
   const activeItem = activeId ? opportunities.find((o) => o.id === activeId) : null;
 
+  // Group items by stage, sorted by sort_order
+  const itemsByStage = useMemo(() => {
+    const map: Record<string, Opportunity[]> = {};
+    stages.forEach((s) => {
+      map[s.key] = opportunities
+        .filter((o) => o.stage === s.key)
+        .sort((a, b) => a.sort_order - b.sort_order);
+    });
+    return map;
+  }, [opportunities]);
+
+  const findStageOfItem = (itemId: string): string | null => {
+    for (const [stageKey, items] of Object.entries(itemsByStage)) {
+      if (items.some((i) => i.id === itemId)) return stageKey;
+    }
+    return null;
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
 
-  const handleDragOver = (event: any) => {
-    const overId = event.over?.id as string | null;
-    if (overId && stages.some((s) => s.key === overId)) {
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event;
+    if (!over) {
+      setOverColumn(null);
+      return;
+    }
+    const overId = over.id as string;
+    // Over a column directly
+    if (stages.some((s) => s.key === overId)) {
       setOverColumn(overId);
     } else {
-      setOverColumn(null);
+      // Over another card — find which column it's in
+      const stage = findStageOfItem(overId);
+      setOverColumn(stage);
     }
   };
 
@@ -191,16 +235,36 @@ const KanbanBoard = ({
     setActiveId(null);
     setOverColumn(null);
 
-    if (!over || !onStageChange) return;
+    if (!over) return;
+
+    const activeItemData = opportunities.find((o) => o.id === active.id);
+    if (!activeItemData) return;
 
     const overId = over.id as string;
-    const draggedItem = opportunities.find((o) => o.id === active.id);
+    const isOverColumn = stages.some((s) => s.key === overId);
+    const targetStage = isOverColumn ? overId : findStageOfItem(overId);
 
-    if (!draggedItem) return;
+    if (!targetStage) return;
 
-    if (stages.some((s) => s.key === overId)) {
-      if (draggedItem.stage !== overId) {
-        onStageChange(draggedItem.id, overId);
+    if (activeItemData.stage !== targetStage) {
+      // Cross-column move
+      if (onStageChange) {
+        onStageChange(activeItemData.id, targetStage);
+      }
+    } else {
+      // Same-column reorder
+      const columnItems = [...itemsByStage[targetStage]];
+      const oldIndex = columnItems.findIndex((i) => i.id === active.id);
+      const newIndex = isOverColumn
+        ? columnItems.length - 1
+        : columnItems.findIndex((i) => i.id === overId);
+
+      if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+        const reordered = arrayMove(columnItems, oldIndex, newIndex);
+        const updated = reordered.map((item, idx) => ({ ...item, sort_order: idx }));
+        if (onReorder) {
+          onReorder(updated);
+        }
       }
     }
   };
@@ -208,7 +272,7 @@ const KanbanBoard = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
@@ -216,19 +280,23 @@ const KanbanBoard = ({
         announcements: {
           onDragStart({ active }) {
             const item = opportunities.find((o) => o.id === active.id);
-            return `Picked up ${item?.title}. Use arrow keys to move between columns.`;
+            return `Picked up ${item?.title}. Use arrow keys to reorder or move between columns.`;
           },
           onDragOver({ active, over }) {
             const item = opportunities.find((o) => o.id === active.id);
-            const stage = stages.find((s) => s.key === over?.id);
-            return stage ? `${item?.title} is over ${stage.label} column.` : "";
+            const overId = over?.id as string;
+            const stage = stages.find((s) => s.key === overId);
+            if (stage) return `${item?.title} is over ${stage.label} column.`;
+            const overItem = opportunities.find((o) => o.id === overId);
+            return overItem ? `${item?.title} is over ${overItem.title}.` : "";
           },
           onDragEnd({ active, over }) {
             const item = opportunities.find((o) => o.id === active.id);
-            const stage = stages.find((s) => s.key === over?.id);
+            const overId = over?.id as string;
+            const stage = stages.find((s) => s.key === overId);
             return stage
               ? `Dropped ${item?.title} in ${stage.label} column.`
-              : `${item?.title} was dropped.`;
+              : `${item?.title} was reordered.`;
           },
           onDragCancel({ active }) {
             const item = opportunities.find((o) => o.id === active.id);
@@ -239,18 +307,15 @@ const KanbanBoard = ({
     >
       <div className="overflow-x-auto" role="group" aria-label="Kanban board with stages: Idea, Validate, Build, Monetize, Scale">
         <div className="flex gap-4 min-w-[900px]">
-          {stages.map((stage) => {
-            const items = opportunities.filter((o) => o.stage === stage.key);
-            return (
-              <DroppableColumn
-                key={stage.key}
-                stage={stage}
-                items={items}
-                isOver={overColumn === stage.key}
-                onStageChange={onStageChange}
-              />
-            );
-          })}
+          {stages.map((stage) => (
+            <DroppableColumn
+              key={stage.key}
+              stage={stage}
+              items={itemsByStage[stage.key]}
+              isOver={overColumn === stage.key}
+              onStageChange={onStageChange}
+            />
+          ))}
         </div>
       </div>
       <DragOverlay>
