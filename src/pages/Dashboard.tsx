@@ -54,7 +54,6 @@ const Dashboard = () => {
   };
 
   const handleReorder = async (reorderedItems: Idea[]) => {
-    // Optimistic update
     setIdeas((prev) => {
       const updated = [...prev];
       reorderedItems.forEach((item) => {
@@ -63,7 +62,6 @@ const Dashboard = () => {
       });
       return updated;
     });
-    // Persist to DB
     await Promise.all(
       reorderedItems.map((item) =>
         supabase.from("ideas").update({ sort_order: item.sort_order }).eq("id", item.id)
@@ -75,8 +73,8 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+      <div className="min-h-screen bg-background flex items-center justify-center cyber-grid">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -89,16 +87,16 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background cyber-grid">
       <Navbar />
 
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="mb-8">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="font-display text-3xl font-bold text-foreground mb-1">
+            <h1 className="font-display text-3xl font-bold text-foreground mb-1 text-neon-glow tracking-wider">
               {profile?.name ? `Hey ${profile.name}! 👋` : "Your Dashboard 👋"}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground font-mono text-sm">
               {ideas.length > 0 ? "Here are your AI-generated opportunities." : "Complete onboarding to get personalized opportunities."}
             </p>
           </motion.div>
@@ -106,15 +104,15 @@ const Dashboard = () => {
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { icon: Lightbulb, label: "Opportunities", value: String(ideas.length), color: "text-accent" },
+            { icon: Lightbulb, label: "Opportunities", value: String(ideas.length), color: "text-primary" },
             { icon: Sparkles, label: "Best Match", value: bestMatch ? `${bestMatch}%` : "—", color: "text-success" },
             { icon: TrendingUp, label: "In Progress", value: String(ideas.filter((i) => i.stage !== "idea").length), color: "text-accent" },
             { icon: BarChart3, label: "Launched", value: String(ideas.filter((i) => i.stage === "monetize" || i.stage === "scale").length), color: "text-muted-foreground" },
           ].map((stat) => (
-            <div key={stat.label} className="bg-card rounded-xl p-4 border">
+            <div key={stat.label} className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border border-primary/10 hover:border-primary/30 transition-all duration-300">
               <stat.icon className={`w-5 h-5 ${stat.color} mb-2`} />
               <div className="font-display text-2xl font-bold text-foreground">{stat.value}</div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
+              <div className="text-sm text-muted-foreground font-mono uppercase tracking-wider">{stat.label}</div>
             </div>
           ))}
         </motion.div>
@@ -126,7 +124,7 @@ const Dashboard = () => {
               variant={view === tab.key ? "default" : "ghost"}
               size="sm"
               onClick={() => setView(tab.key)}
-              className="shrink-0"
+              className={`shrink-0 font-mono uppercase tracking-wider text-xs ${view === tab.key ? "shadow-neon-cyan" : ""}`}
             >
               <tab.icon className="w-4 h-4 mr-1" /> {tab.label}
             </Button>
@@ -145,7 +143,7 @@ const Dashboard = () => {
           ) : (
             <div className="text-center py-16 text-muted-foreground">
               <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p>No opportunities yet. Complete the onboarding to generate ideas!</p>
+              <p className="font-mono">No opportunities yet. Complete the onboarding to generate ideas!</p>
             </div>
           )
         )}

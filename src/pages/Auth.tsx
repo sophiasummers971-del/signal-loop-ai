@@ -63,20 +63,23 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4 cyber-grid relative">
+      {/* Ambient glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 blur-3xl rounded-full" />
+
+      <div className="w-full max-w-md relative z-10">
         <Link to="/" className="flex items-center gap-2 justify-center mb-8">
-          <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-            <Zap className="w-6 h-6 text-accent-foreground" />
+          <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center shadow-neon-cyan">
+            <Zap className="w-6 h-6 text-primary" />
           </div>
-          <span className="font-display font-bold text-2xl text-primary-foreground">SignalLoop</span>
+          <span className="font-display font-bold text-2xl text-foreground tracking-wider">SignalLoop</span>
         </Link>
 
-        <div className="bg-card rounded-2xl p-8 shadow-lg">
-          <h1 className="font-display text-2xl font-bold text-foreground text-center mb-2">
+        <div className="bg-card/90 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-primary/15">
+          <h1 className="font-display text-2xl font-bold text-foreground text-center mb-2 tracking-wider">
             {isForgotPassword ? "Reset password" : isLogin ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="text-muted-foreground text-center text-sm mb-6">
+          <p className="text-muted-foreground text-center text-sm mb-6 font-mono">
             {isForgotPassword
               ? "Enter your email and we'll send you a reset link"
               : isLogin
@@ -87,7 +90,7 @@ const Auth = () => {
           {isForgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
+                <label className="text-sm font-medium text-foreground mb-1 block font-mono uppercase tracking-wider">Email</label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                   <Input
@@ -95,13 +98,13 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="pl-10 h-12"
+                    className="pl-10 h-12 bg-muted/50 border-primary/20 focus:border-primary/50"
                     required
                   />
                 </div>
               </div>
 
-              <Button variant="accent" size="lg" className="w-full gap-2" disabled={loading}>
+              <Button variant="default" size="lg" className="w-full gap-2 shadow-neon-cyan" disabled={loading}>
                 {loading ? "Sending..." : "Send Reset Link"}
                 <ArrowRight className="w-4 h-4" />
               </Button>
@@ -109,9 +112,9 @@ const Auth = () => {
               <div className="text-center">
                 <button
                   onClick={() => setIsForgotPassword(false)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-mono"
                 >
-                  Back to <span className="font-medium text-accent">Sign in</span>
+                  Back to <span className="font-medium text-primary">Sign in</span>
                 </button>
               </div>
             </form>
@@ -119,7 +122,7 @@ const Auth = () => {
             <>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
+                  <label className="text-sm font-medium text-foreground mb-1 block font-mono uppercase tracking-wider">Email</label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                     <Input
@@ -127,7 +130,7 @@ const Auth = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="pl-10 h-12"
+                      className="pl-10 h-12 bg-muted/50 border-primary/20 focus:border-primary/50"
                       required
                     />
                   </div>
@@ -135,12 +138,12 @@ const Auth = () => {
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-sm font-medium text-foreground">Password</label>
+                    <label className="text-sm font-medium text-foreground font-mono uppercase tracking-wider">Password</label>
                     {isLogin && (
                       <button
                         type="button"
                         onClick={() => setIsForgotPassword(true)}
-                        className="text-xs text-accent hover:text-accent/80 transition-colors"
+                        className="text-xs text-primary hover:text-primary/80 transition-colors font-mono"
                       >
                         Forgot password?
                       </button>
@@ -153,14 +156,14 @@ const Auth = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="pl-10 h-12"
+                      className="pl-10 h-12 bg-muted/50 border-primary/20 focus:border-primary/50"
                       required
                       minLength={6}
                     />
                   </div>
                 </div>
 
-                <Button variant="accent" size="lg" className="w-full gap-2" disabled={loading}>
+                <Button variant="default" size="lg" className="w-full gap-2 shadow-neon-cyan" disabled={loading}>
                   {loading ? "Loading..." : isLogin ? "Sign In" : "Create Account"}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -169,10 +172,10 @@ const Auth = () => {
               <div className="mt-6 text-center">
                 <button
                   onClick={() => setIsLogin(!isLogin)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-mono"
                 >
                   {isLogin ? "Don't have an account? " : "Already have an account? "}
-                  <span className="font-medium text-accent">{isLogin ? "Sign up" : "Sign in"}</span>
+                  <span className="font-medium text-primary">{isLogin ? "Sign up" : "Sign in"}</span>
                 </button>
               </div>
             </>
