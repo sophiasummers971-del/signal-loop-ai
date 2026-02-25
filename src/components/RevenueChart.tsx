@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import EmptyState from "@/components/EmptyState";
 import { DollarSign, Plus, Trash2, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -201,10 +202,7 @@ const RevenueChart = ({ ideas }: { ideas: Idea[] }) => {
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className="text-center py-12 text-muted-foreground">
-          <DollarSign className="w-12 h-12 mx-auto mb-4 opacity-30" />
-          <p>No revenue logged yet. Start tracking your income!</p>
-        </div>
+        <EmptyState type="revenue" />
       )}
 
       {/* Recent entries */}

@@ -6,7 +6,9 @@ import OpportunityCard from "@/components/OpportunityCard";
 import KanbanBoard from "@/components/KanbanBoard";
 import RevenueChart from "@/components/RevenueChart";
 import TaskManager from "@/components/TaskManager";
-import { Sparkles, TrendingUp, Lightbulb, BarChart3, DollarSign, ListChecks, Loader2 } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
+import { DashboardSkeleton } from "@/components/CyberSkeleton";
+import { Sparkles, TrendingUp, Lightbulb, BarChart3, DollarSign, ListChecks } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -73,8 +75,9 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center cyber-grid">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background cyber-grid">
+        <Navbar />
+        <DashboardSkeleton />
       </div>
     );
   }
@@ -141,10 +144,7 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 text-muted-foreground">
-              <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p className="font-mono">No opportunities yet. Complete the onboarding to generate ideas!</p>
-            </div>
+            <EmptyState type="opportunities" />
           )
         )}
 
