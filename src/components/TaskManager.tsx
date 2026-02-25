@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import EmptyState from "@/components/EmptyState";
 import { Plus, Trash2, ListChecks, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -176,10 +177,7 @@ const TaskManager = ({ ideas }: { ideas: Idea[] }) => {
               );
             })
           ) : (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 text-muted-foreground">
-              <ListChecks className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p>No tasks yet. Add your first task above!</p>
-            </motion.div>
+            <EmptyState type="tasks" />
           )}
         </AnimatePresence>
       </div>
