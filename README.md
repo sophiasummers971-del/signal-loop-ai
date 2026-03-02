@@ -50,6 +50,33 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Troubleshooting installs (quick fix)
+
+If you see this warning while installing:
+
+```
+npm warn Unknown env config "http-proxy"
+```
+
+it means your shell exported a deprecated npm env var. The project is fine, but installs can be noisy (and in some proxied setups, slow).
+
+Try this in your terminal before `npm i`:
+
+```sh
+# Remove deprecated npm env var for this shell session
+unset npm_config_http_proxy
+
+# Keep modern proxy vars (if your network requires a proxy)
+export npm_config_proxy="$HTTP_PROXY"
+export npm_config_https_proxy="$HTTPS_PROXY"
+```
+
+Then run:
+
+```sh
+npm i
+```
+
 ## What technologies are used for this project?
 
 This project is built with:
