@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Zap, Menu, X, LogOut } from "lucide-react";
+import { Zap, Menu, X, LogOut, Settings, HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,6 +47,12 @@ const Navbar = () => {
           ) : (
             <>
               <Link to="/dashboard" className="text-muted-foreground hover:text-primary text-sm transition-colors font-mono uppercase tracking-wider">Dashboard</Link>
+              <Link to="/settings" className="text-muted-foreground hover:text-primary text-sm transition-colors font-mono uppercase tracking-wider flex items-center gap-1">
+                <Settings className="w-3.5 h-3.5" /> Settings
+              </Link>
+              <Link to="/support" className="text-muted-foreground hover:text-primary text-sm transition-colors font-mono uppercase tracking-wider flex items-center gap-1">
+                <HelpCircle className="w-3.5 h-3.5" /> Help
+              </Link>
               <button onClick={handleSignOut} className="text-muted-foreground hover:text-primary text-sm transition-colors flex items-center gap-1 font-mono uppercase tracking-wider">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
@@ -78,6 +84,8 @@ const Navbar = () => {
               ) : (
                 <>
                   <Link to="/dashboard" className="text-muted-foreground hover:text-primary text-sm py-2 font-mono" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+                  <Link to="/settings" className="text-muted-foreground hover:text-primary text-sm py-2 font-mono" onClick={() => setMobileOpen(false)}>Settings</Link>
+                  <Link to="/support" className="text-muted-foreground hover:text-primary text-sm py-2 font-mono" onClick={() => setMobileOpen(false)}>Help & FAQ</Link>
                   <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="text-muted-foreground hover:text-primary text-sm py-2 text-left font-mono">Sign Out</button>
                 </>
               )}
