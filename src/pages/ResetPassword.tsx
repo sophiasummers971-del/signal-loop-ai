@@ -54,23 +54,23 @@ const ResetPassword = () => {
 
   if (!isRecovery) {
     return (
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-        <div className="w-full max-w-md text-center">
+      <div className="min-h-screen bg-gradient-hero cyber-grid flex items-center justify-center p-4 relative">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 blur-3xl rounded-full" />
+        <div className="w-full max-w-md text-center relative z-10">
           <Link to="/" className="flex items-center gap-2 justify-center mb-8">
-            <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-              <Zap className="w-6 h-6 text-accent-foreground" />
+            <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center shadow-neon-cyan">
+              <Zap className="w-6 h-6 text-primary" />
             </div>
-            <span className="font-display font-bold text-2xl text-primary-foreground">SignalLoop</span>
+            <span className="font-display font-bold text-2xl text-foreground tracking-wider">SignalLoop</span>
           </Link>
-          <div className="bg-card rounded-2xl p-8 shadow-lg">
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2">Invalid Link</h1>
-            <p className="text-muted-foreground text-sm mb-6">
+          <div className="bg-card/90 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-primary/15">
+            <h1 className="font-display text-2xl font-bold text-foreground mb-2 tracking-wider">Invalid Link</h1>
+            <p className="text-muted-foreground text-sm font-mono mb-6">
               This password reset link is invalid or has expired.
             </p>
             <Link to="/auth">
-              <Button variant="accent" size="lg" className="w-full gap-2">
-                Back to Sign In
-                <ArrowRight className="w-4 h-4" />
+              <Button variant="default" size="lg" className="w-full gap-2 shadow-neon-cyan font-mono uppercase tracking-wider text-xs">
+                Back to Sign In <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
@@ -80,26 +80,27 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-hero cyber-grid flex items-center justify-center p-4 relative">
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 blur-3xl rounded-full" />
+      <div className="w-full max-w-md relative z-10">
         <Link to="/" className="flex items-center gap-2 justify-center mb-8">
-          <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-            <Zap className="w-6 h-6 text-accent-foreground" />
+          <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center shadow-neon-cyan">
+            <Zap className="w-6 h-6 text-primary" />
           </div>
-          <span className="font-display font-bold text-2xl text-primary-foreground">SignalLoop</span>
+          <span className="font-display font-bold text-2xl text-foreground tracking-wider">SignalLoop</span>
         </Link>
 
-        <div className="bg-card rounded-2xl p-8 shadow-lg">
-          <h1 className="font-display text-2xl font-bold text-foreground text-center mb-2">
+        <div className="bg-card/90 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-primary/15">
+          <h1 className="font-display text-2xl font-bold text-foreground text-center mb-2 tracking-wider">
             Set New Password
           </h1>
-          <p className="text-muted-foreground text-center text-sm mb-6">
+          <p className="text-muted-foreground text-center text-sm font-mono mb-6">
             Enter your new password below
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">New Password</label>
+              <label className="text-xs font-mono font-medium text-primary/80 mb-1.5 block uppercase tracking-wider">New Password</label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                 <Input
@@ -107,7 +108,7 @@ const ResetPassword = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-10 h-12"
+                  className="pl-10 h-12 bg-muted/50 border-primary/20 focus:border-primary/50"
                   required
                   minLength={6}
                 />
@@ -115,7 +116,7 @@ const ResetPassword = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Confirm Password</label>
+              <label className="text-xs font-mono font-medium text-primary/80 mb-1.5 block uppercase tracking-wider">Confirm Password</label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                 <Input
@@ -123,14 +124,14 @@ const ResetPassword = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-10 h-12"
+                  className="pl-10 h-12 bg-muted/50 border-primary/20 focus:border-primary/50"
                   required
                   minLength={6}
                 />
               </div>
             </div>
 
-            <Button variant="accent" size="lg" className="w-full gap-2" disabled={loading}>
+            <Button variant="default" size="lg" className="w-full gap-2 shadow-neon-cyan font-mono uppercase tracking-wider text-xs" disabled={loading}>
               {loading ? "Updating..." : "Update Password"}
               <ArrowRight className="w-4 h-4" />
             </Button>

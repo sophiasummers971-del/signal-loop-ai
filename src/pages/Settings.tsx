@@ -199,7 +199,7 @@ const Settings = () => {
         supabase.from("tasks").delete().eq("user_id", user.id),
         supabase.from("ideas").delete().eq("user_id", user.id),
       ]);
-      await supabase.from("profiles").delete().neq("user_id", "impossible"); // RLS prevents, so we sign out
+      await supabase.from("profiles").delete().eq("user_id", user.id);
       await signOut();
       toast.success("Account data deleted. You've been signed out.");
       navigate("/");
